@@ -1,0 +1,43 @@
+.data
+array: .word 1, 2, 3, 4, 5
+size: .word 5
+target: .word 4
+
+.text
+.globl main
+main:
+    la $t0, array       # 배열의 시작 주소
+    lw $t1, size        # 배열 크기
+    lw $t2, target      # 찾고자 하는 값
+
+    li $t3, 0           # low = 0
+    sub $t4, $t1, 1     # high = size - 1
+
+binary_search:
+    ble $t3, $t4, search_loop_end  
+    add $t5, $t3, $t4              
+    sra $t5, $t5, 1
+
+    sll $t6, $t5, 2                
+    add $t7, $t0, $t6              
+    lw $t8, 0($t7)                 
+
+    beq $t8, $t2, found            
+    blt $t8, $t2, adjust_low       
+    sub $t4, $t5, 1                
+    j binary_search
+
+adjust_low:
+    add $t3, $t5, 1                
+    j binary_search
+
+search_loop_end:
+    li $v0, 10                     
+    syscall
+
+found:
+    li $v0, 1
+    move $a0, $t8                 
+    syscall
+    li $v0, 10
+    syscall
